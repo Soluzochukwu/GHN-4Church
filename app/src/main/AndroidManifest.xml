@@ -28,7 +28,8 @@
         <activity android:name=".DS_Settings" />
         <activity android:name=".Help_Settings" />
         <activity android:name=".EditProfile_Account" />
-        <activity android:name=".Delete_Account"></activity>
+        <activity android:name=".Delete_Account" />
+        <activity android:name=".ChatActivity"></activity>
     </application>
 
 </manifest>

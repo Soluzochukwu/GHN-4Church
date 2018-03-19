@@ -16,10 +16,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -42,13 +41,12 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
     private Button settingsButton;
     private String password;
     private Button  add_room;
-    private EditText room_name;
 
     private ListView listView;
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> list_of_rooms = new ArrayList<>();
-    private String name, groupName, emergencyMessage, temp_key;
-    private DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot();
+    private String name, room_name, emergencyMessage, temp_key;
+    private DatabaseReference root, roots;
 
 
     @Override
@@ -58,6 +56,8 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_profile_activicty);
 
         setTitle("Groups");
+
+        root = FirebaseDatabase.getInstance().getReference().getRoot();
 
         firebaseAuth = FirebaseAuth.getInstance();
         if (firebaseAuth.getCurrentUser() ==null)
@@ -77,21 +77,29 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
         add_room.setOnClickListener(this);
         listView =  findViewById(R.id.listView);
 
-        arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,list_of_rooms);
-        request_user_name1();
+        arrayAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,list_of_rooms);
+        request_user_name();
         listView.setAdapter(arrayAdapter);
 
 
 
         listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                Intent intent = new Intent(getApplicationContext(),ChatRoom.class);
-                //intent.putExtra("room_name",((TextView)view).getText().toString() );
-                intent.putExtra("user_name",name);
-                intent.putExtra("group name",groupName);
-                startActivity(intent);
+                String group = (String) listView.getItemAtPosition(i);
+                if(name.isEmpty()){
+                    request_user_name();
+                }else {
+                    chatRoomClicked(group);
+                }
+
+//                Intent intent = new Intent(getApplicationContext(),ChatRoom.class);
+//                //intent.putExtra("room_name",((TextView)view).getText().toString() );
+//                intent.putExtra("user_name",name);
+//                intent.putExtra("group name",room_name);
+//                startActivity(intent);
 
             }
         }));
@@ -122,6 +130,14 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
 
     }
 
+    public void chatRoomClicked (String string){
+        Intent intent = new Intent(getApplicationContext(),ChatActivity.class);
+        //intent.putExtra("room_name",((TextView)view).getText().toString() );
+        intent.putExtra("userName",name);
+        intent.putExtra("groupName",string);
+        startActivity(intent);
+    }
+
     @Override
     public void onClick(View view) {
 
@@ -134,47 +150,12 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
         }
 
         if (view == add_room){
-            request_user_name();
-            Map<String,Object> map = new HashMap<String, Object>();
-     //       map.put(room_name.getText().toString(),"");
-//            if(!groupName.isEmpty()){
-//                map.put(groupName,"");
-//                groupName = "";
-//                root.updateChildren(map);
-//            }
-
-
+            request_group_name();
         }
 
     }
 
-    private void request_user_name() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Enter Group Name:");
 
-
-        final EditText input_field = new EditText(this);
-
-        builder.setView(input_field);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                groupName = input_field.getText().toString();
-                Map<String,Object> map = new HashMap<String, Object>();
-                map.put(groupName,"");
-                root.updateChildren(map);
-
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-        builder.show();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -189,8 +170,6 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
             case R.id.emergencyButton:
                 //User chose emergency button
                 emergencyprocedure();
-
-
                 return true;
 
             default:
@@ -200,34 +179,69 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
         }
     }
 
+
+
+    private void request_group_name() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter Room name:");
+
+        final EditText input_field = new EditText(this);
+
+        builder.setView(input_field);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                room_name = input_field.getText().toString();
+
+                Map<String,Object> map = new HashMap<String, Object>();
+                map.put(room_name,"");
+                root.updateChildren(map);
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+                //request_group_name();
+            }
+        });
+
+        builder.show();
+    }
+
     private void emergencyprocedure(){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter Emergency Message:");
         final EditText input_field = new EditText(this);
         builder.setView(input_field);
+
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 emergencyMessage = input_field.getText().toString();
 
-                for (String string: list_of_rooms) {
+                for (String group: list_of_rooms) {
 
+                    roots = FirebaseDatabase.getInstance().getReference().child(group);
 
-                    Map<String, Object> map = new HashMap<>();
-                    temp_key = root.push().getKey();
-                    root.updateChildren(map);
-                    DatabaseReference message_root = root.child(temp_key);
+                    Map<String, Object> map4 = new HashMap<>();
+                    temp_key = roots.push().getKey();
+                    roots.updateChildren(map4);
+                    DatabaseReference message_root = roots.child(temp_key);
+
                     Map<String, Object> map2 = new HashMap<>();
                     map2.put("name", name);
                     map2.put("msg", emergencyMessage);
                     message_root.updateChildren(map2);
+
                 }
-
-
             }
         });
-
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -238,7 +252,7 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
 
     }
 
-    private void request_user_name1() {
+    private void request_user_name() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter name:");
 
@@ -256,7 +270,7 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.cancel();
-                request_user_name1();
+                request_user_name();
             }
         });
 

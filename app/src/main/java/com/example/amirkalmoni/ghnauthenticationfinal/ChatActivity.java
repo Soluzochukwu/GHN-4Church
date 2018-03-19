@@ -18,8 +18,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 
-public class ChatRoom extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity {
 
     private Button btn_send_msg;
     private EditText input_msg;
@@ -28,25 +30,30 @@ public class ChatRoom extends AppCompatActivity {
     private String user_name,room_name;
     private DatabaseReference root ;
     private String temp_key;
-    private FirebaseAuth firebaseAuth;
-    private DatabaseReference mDatabase;
-    private FirebaseUser user;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat_room);
+        setContentView(R.layout.activity_chat);
 
         btn_send_msg = findViewById(R.id.buttonSend);
         input_msg = findViewById(R.id.editTextMessage);
         chat_conversation = findViewById(R.id.textView3);
-        user_name = getIntent().getExtras().get("user_name").toString();
-        room_name = getIntent().getExtras().get("room_name").toString();
+
+
+        Bundle extras = getIntent().getExtras();
+        if(extras != null){
+            user_name = extras.getString("userName");
+            room_name = extras.getString("groupName");
+        }
         setTitle(" Room - "+room_name);
+//        user_name = getIntent().getExtras().get("userName").toString();
+//        room_name = getIntent().getExtras().get("groupName").toString();
+
 
         root = FirebaseDatabase.getInstance().getReference().child(room_name);
-        mDatabase = FirebaseDatabase.getInstance().getReference().child(user_name);
 
         btn_send_msg.setOnClickListener(new View.OnClickListener() {
 
@@ -57,12 +64,12 @@ public class ChatRoom extends AppCompatActivity {
                 temp_key = root.push().getKey();
                 root.updateChildren(map);
 
-                DatabaseReference message_root = root.child(temp_key);
+                DatabaseReference message_root1 = root.child(temp_key);
                 Map<String,Object> map2 = new HashMap<>();
                 map2.put("name",user_name);
                 map2.put("msg",input_msg.getText().toString());
 
-                message_root.updateChildren(map2);
+                message_root1.updateChildren(map2);
             }
         });
 

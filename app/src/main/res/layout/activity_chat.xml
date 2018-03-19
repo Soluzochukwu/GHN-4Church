@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.amirkalmoni.ghnauthenticationfinal.ChatRoom">
+    tools:context="com.example.amirkalmoni.ghnauthenticationfinal.ChatActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout2"
@@ -18,14 +18,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/chatRoomToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/chatRoomToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     </LinearLayout>
 
@@ -51,11 +51,10 @@
         android:layout_marginBottom="1dp"
         android:layout_marginEnd="1dp"
         android:layout_marginRight="1dp"
+        android:fitsSystemWindows="true"
         android:text="Send"
         app:layout_constraintBottom_toBottomOf="@+id/editTextMessage"
-        android:fitsSystemWindows="true"
         app:layout_constraintEnd_toEndOf="parent" />
-
 
 
     <ScrollView
