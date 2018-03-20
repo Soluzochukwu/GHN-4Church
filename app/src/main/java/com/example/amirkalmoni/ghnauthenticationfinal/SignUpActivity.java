@@ -94,8 +94,13 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                     Toast.makeText(SignUpActivity.this, "User is Registered Successfully ", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(getApplicationContext(), ProfileActivicty.class);
                     intent.putExtra("password", editTextPassword.getText().toString().trim());
-                    //intent.putExtra("username", editTextUsername.getText().toString().trim());
-                    updateUser();
+
+                    String username =editTextUsername.getText().toString().trim();
+
+                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
+                    user.updateProfile(profileUpdates);
+
                     startActivity(intent);
                     progressDialog.dismiss();
 

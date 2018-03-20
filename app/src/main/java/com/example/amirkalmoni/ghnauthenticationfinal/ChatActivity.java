@@ -45,11 +45,11 @@ public class ChatActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if(extras != null){
-            user_name = extras.getString("userName");
             room_name = extras.getString("groupName");
         }
         setTitle(" Room - "+room_name);
-//        user_name = getIntent().getExtras().get("userName").toString();
+
+        user_name = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
 //        room_name = getIntent().getExtras().get("groupName").toString();
 
 

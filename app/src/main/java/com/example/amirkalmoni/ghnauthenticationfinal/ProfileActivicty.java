@@ -78,7 +78,7 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
         listView =  findViewById(R.id.listView);
 
         arrayAdapter = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,list_of_rooms);
-        request_user_name();
+        //request_user_name();
         listView.setAdapter(arrayAdapter);
 
 
@@ -89,11 +89,9 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 String group = (String) listView.getItemAtPosition(i);
-                if(name.isEmpty()){
-                    request_user_name();
-                }else {
-                    chatRoomClicked(group);
-                }
+                name = firebaseAuth.getCurrentUser().getDisplayName();
+                chatRoomClicked(name, group);
+
 
 //                Intent intent = new Intent(getApplicationContext(),ChatRoom.class);
 //                //intent.putExtra("room_name",((TextView)view).getText().toString() );
@@ -130,10 +128,10 @@ public class ProfileActivicty extends AppCompatActivity implements View.OnClickL
 
     }
 
-    public void chatRoomClicked (String string){
+    public void chatRoomClicked (String userName, String string){
         Intent intent = new Intent(getApplicationContext(),ChatActivity.class);
         //intent.putExtra("room_name",((TextView)view).getText().toString() );
-        intent.putExtra("userName",name);
+        intent.putExtra("userName",userName);
         intent.putExtra("groupName",string);
         startActivity(intent);
     }
